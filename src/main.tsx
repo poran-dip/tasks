@@ -1,6 +1,6 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { HashRouter } from "react-router";
+import { BrowserRouter } from "react-router";
 import "./index.css";
 import App from "./App";
 import { ConfirmProvider } from "./components/ConfirmProvider";
@@ -18,12 +18,12 @@ if ("serviceWorker" in navigator && import.meta.env.PROD) {
 // biome-ignore lint/style/noNonNullAssertion: Vite scaffold
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <HashRouter>
+    <BrowserRouter>
       <StoreProvider>
         <ConfirmProvider>
           <App />
         </ConfirmProvider>
       </StoreProvider>
-    </HashRouter>
+    </BrowserRouter>
   </StrictMode>,
 );

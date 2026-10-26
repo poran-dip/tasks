@@ -6,4 +6,23 @@
 
 html {
   scrollbar-gutter: stable;
+  scrollbar-width: thin;
+  scrollbar-color: rgb(120 113 108 / 0.5) transparent;
+}
+
+@layer base {
+  button {
+    cursor: pointer;
+  }
+}
+
+/* Hide the up/down spinners on number inputs. */
+input[type="number"] {
+  appearance: textfield;
+}
+
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  appearance: none;
+  margin: 0;
 }

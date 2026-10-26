@@ -101,7 +101,7 @@ export function TasksPage() {
   };
 
   return (
-    <div ref={rootRef} className="space-y-4">
+    <div ref={rootRef} className="space-y-4 pb-20">
       <div className="space-y-3">
         <div className="flex flex-wrap items-end justify-between gap-2">
           <div>
@@ -113,13 +113,6 @@ export function TasksPage() {
           <div className="flex flex-wrap gap-2">
             <button
               type="button"
-              onClick={addGroup}
-              className="rounded-md border border-stone-300 px-3 py-1.5 text-sm hover:bg-stone-100 dark:border-neutral-700 dark:hover:bg-neutral-800"
-            >
-              Add group
-            </button>
-            <button
-              type="button"
               onClick={() =>
                 dispatch({
                   type: "setSettings",
@@ -129,6 +122,13 @@ export function TasksPage() {
               className="rounded-md border border-stone-300 px-3 py-1.5 text-sm hover:bg-stone-100 dark:border-neutral-700 dark:hover:bg-neutral-800"
             >
               {settings.hideCompleted ? "Show completed" : "Hide completed"}
+            </button>
+            <button
+              type="button"
+              onClick={addGroup}
+              className="flex items-center gap-1 rounded-md bg-blue-600 px-3 py-1.5 text-sm text-white transition-colors hover:bg-blue-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 active:bg-blue-800"
+            >
+              Add group
             </button>
           </div>
         </div>

@@ -1,4 +1,5 @@
 import { useSortable } from "@dnd-kit/react/sortable";
+import { PencilSimpleIcon } from "@phosphor-icons/react";
 import { useEffect, useRef } from "react";
 import { formatDay } from "@/lib/dates";
 import { reappearDate } from "@/lib/repeat";
@@ -115,10 +116,11 @@ function SortableTask({ task, index, column, ui }: Props) {
         type="button"
         ref={editRef}
         aria-label={`Edit ${label}`}
+        title="Edit task"
         onClick={() => ui.setEditingId(task.id)}
-        className="rounded px-2 py-0.5 text-xs text-stone-500 hover:bg-stone-100 hover:text-stone-800 dark:text-stone-400 dark:hover:bg-neutral-800"
+        className="rounded p-1.5 text-stone-500 hover:bg-stone-100 hover:text-stone-800 dark:text-stone-400 dark:hover:bg-neutral-800 dark:hover:text-stone-200"
       >
-        Edit
+        <PencilSimpleIcon aria-hidden="true" size={16} />
       </button>
     </div>
   );

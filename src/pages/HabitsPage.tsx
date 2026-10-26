@@ -1,9 +1,29 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { addDays, dayKey, startOfDay } from "@/lib/dates";
 import { dayStreaks, taskStreak } from "@/lib/streaks";
 import { useStore } from "@/state/context";
 
-const WEEKS = 15;
+const WEEKS = 53;
+const MONTHS = [
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
+];
+
+interface Cell {
+  key: string;
+  count: number;
+  label: string;
+}
 
 function cellClass(count: number): string {
   if (count === 0) return "bg-stone-200 dark:bg-neutral-800";
@@ -12,7 +32,7 @@ function cellClass(count: number): string {
   return "bg-emerald-600 dark:bg-emerald-500";
 }
 
-export function StreaksPage() {
+export function HabitsPage() {
   const { state } = useStore();
   const [now] = useState(() => new Date());
 
@@ -40,17 +60,40 @@ export function StreaksPage() {
   }, [state.history, state.tasks, now]);
 
   const today = startOfDay(now);
+  // Columns are weeks (Sunday to Saturday) ending with the current week, like a contribution graph.
   const start = addDays(today, -(7 * (WEEKS - 1) + today.getDay()));
-  const cells: { key: string; count: number; label: string }[] = [];
-  for (let d = start; d <= today; d = addDays(d, 1)) {
-    const key = dayKey(d);
-    const count = stats.perDay.get(key) ?? 0;
-    cells.push({
-      key,
-      count,
-      label: `${d.toDateString()}: ${count} completed`,
-    });
+  const weeks: { month: string | null; days: (Cell | null)[] }[] = [];
+  let lastMonth = -1;
+  let yearTotal = 0;
+  for (let w = 0; w < WEEKS; w++) {
+    const days: (Cell | null)[] = [];
+    for (let i = 0; i < 7; i++) {
+      const d = addDays(start, w * 7 + i);
+      if (d > today) {
+        days.push(null);
+        continue;
+      }
+      const key = dayKey(d);
+      const count = stats.perDay.get(key) ?? 0;
+      yearTotal += count;
+      days.push({
+        key,
+        count,
+        label: `${d.toDateString()}: ${count} completed`,
+      });
+    }
+    const first = addDays(start, w * 7);
+    const showMonth = first.getMonth() !== lastMonth;
+    lastMonth = first.getMonth();
+    weeks.push({ month: showMonth ? MONTHS[first.getMonth()] : null, days });
   }
+
+  const scrollRef = useRef<HTMLDivElement>(null);
+  // Start at the right edge so the most recent weeks are visible.
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (el) el.scrollLeft = el.scrollWidth;
+  }, []);
 
   const tiles = [
     { label: "Current streak", value: stats.days.current, unit: "days" },
@@ -66,7 +109,7 @@ export function StreaksPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-xl font-semibold">Streaks</h1>
+        <h1 className="text-xl font-semibold">Habit streaks</h1>
         <p className="text-sm text-stone-500 dark:text-stone-400">
           A day counts when you complete at least one task.
         </p>
@@ -87,17 +130,62 @@ export function StreaksPage() {
       </div>
 
       <section>
-        <h2 className="mb-2 text-sm font-semibold">Last {WEEKS} weeks</h2>
-        <div className="overflow-x-auto">
-          <div className="grid w-max grid-flow-col grid-rows-7 gap-1">
-            {cells.map((c) => (
-              <div
-                key={c.key}
-                title={c.label}
-                className={`h-3.5 w-3.5 rounded-sm ${cellClass(c.count)}`}
-              />
+        <h2 className="mb-2 text-sm font-semibold">
+          {yearTotal} {yearTotal === 1 ? "completion" : "completions"} in the
+          last year
+        </h2>
+        <div className="flex gap-2">
+          <div
+            aria-hidden="true"
+            className="flex shrink-0 flex-col gap-1 pt-5 text-[10px] leading-3.5 text-stone-500 dark:text-stone-400"
+          >
+            {["", "Mon", "", "Wed", "", "Fri", ""].map((d, i) => (
+              // biome-ignore lint/suspicious/noArrayIndexKey: fixed list of seven weekday slots
+              <div key={i} className="h-3.5">
+                {d}
+              </div>
             ))}
           </div>
+          <div ref={scrollRef} className="overflow-x-auto pb-2">
+            <div
+              role="img"
+              aria-label={`Tasks completed per day over the last year, ${yearTotal} in total`}
+              className="flex w-max gap-1"
+            >
+              {weeks.map((week) => (
+                <div
+                  key={week.days[0]?.key ?? week.month}
+                  className="flex flex-col gap-1"
+                >
+                  <div className="h-4 text-[10px] leading-4 text-stone-500 dark:text-stone-400">
+                    {week.month}
+                  </div>
+                  {week.days.map((c, i) =>
+                    c ? (
+                      <div
+                        key={c.key}
+                        title={c.label}
+                        className={`h-3.5 w-3.5 rounded-sm ${cellClass(c.count)}`}
+                      />
+                    ) : (
+                      // biome-ignore lint/suspicious/noArrayIndexKey: placeholder for days after today
+                      <div key={`empty-${i}`} className="h-3.5 w-3.5" />
+                    ),
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+        <div
+          aria-hidden="true"
+          className="mt-1 flex items-center justify-end gap-1 text-[10px] text-stone-500 dark:text-stone-400"
+        >
+          Less
+          {[0, 1, 2, 4].map((n) => (
+            <div key={n} className={`h-3 w-3 rounded-sm ${cellClass(n)}`} />
+          ))}
+          More
         </div>
       </section>
 
