@@ -1,13 +1,6 @@
 import { NavLink } from "react-router";
+import { ROUTES } from "@/lib/routes";
 import { useStore } from "@/state/context";
-
-const links = [
-  { to: "/", label: "Tasks" },
-  { to: "/archive", label: "Archive" },
-  { to: "/history", label: "History" },
-  { to: "/habits", label: "Habits" },
-  { to: "/data", label: "Data" },
-];
 
 export function NavBar() {
   const { state } = useStore();
@@ -16,7 +9,7 @@ export function NavBar() {
   return (
     <header className="sticky top-0 z-10 border-b border-stone-200 bg-stone-50/90 backdrop-blur dark:border-neutral-800 dark:bg-neutral-950/90">
       <nav className="mx-auto flex max-w-3xl gap-2 overflow-x-auto px-4 py-2">
-        {links.map((l) => (
+        {ROUTES.map((l) => (
           <NavLink
             key={l.to}
             to={l.to}
