@@ -75,12 +75,16 @@ export function TaskEditor({ task, isDraft, onClose }: Props) {
     >
       <input
         ref={textRef}
+        name="task"
+        autoComplete="off"
         className={inputCls}
         placeholder="Task"
         value={text}
         onChange={(e) => setText(e.target.value)}
       />
       <input
+        name="note"
+        autoComplete="off"
         className={inputCls}
         placeholder="Note (optional)"
         value={note}
@@ -91,6 +95,7 @@ export function TaskEditor({ task, isDraft, onClose }: Props) {
           Repeat after
           <input
             type="number"
+            name="repeat"
             min={1}
             step={1}
             className={`${inputCls} w-16!`}

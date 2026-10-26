@@ -94,6 +94,7 @@ export function DataPage() {
           <label className="flex items-center gap-1.5">
             <input
               type="radio"
+              name="import-mode"
               checked={mode === "merge"}
               onChange={() => setMode("merge")}
             />
@@ -102,6 +103,7 @@ export function DataPage() {
           <label className="flex items-center gap-1.5">
             <input
               type="radio"
+              name="import-mode"
               checked={mode === "replace"}
               onChange={() => setMode("replace")}
             />
@@ -111,6 +113,7 @@ export function DataPage() {
         <input
           ref={fileRef}
           type="file"
+          name="file"
           accept="application/json,.json"
           onChange={onFile}
           className="hidden"
