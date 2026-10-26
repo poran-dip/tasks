@@ -166,6 +166,7 @@ function GroupView({
           <form onSubmit={saveGroup} className="mb-2 flex items-center gap-2">
             <input
               type="color"
+              name="group-color"
               value={color}
               onChange={(e) => setColor(e.target.value)}
               className="h-8 w-8 shrink-0 cursor-pointer rounded border border-stone-300 bg-transparent p-0.5 dark:border-neutral-700"
@@ -173,6 +174,8 @@ function GroupView({
             />
             <input
               ref={nameRef}
+              name="group-name"
+              autoComplete="off"
               value={name}
               onChange={(e) => setName(e.target.value)}
               onKeyDown={(e) => e.key === "Escape" && setRenaming(false)}
