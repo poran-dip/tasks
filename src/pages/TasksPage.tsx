@@ -21,6 +21,14 @@ export function TasksPage() {
     focusUndo: boolean;
   } | null>(null);
   const [newGroup, setNewGroup] = useState("");
+  const rootRef = useRef<HTMLDivElement>(null);
+  /** True while the pointer is in the empty space left or right of the list. */
+  const [outside, setOutside] = useState(false);
+  const outsideRef = useRef(false);
+  const setOutsideBoth = (value: boolean) => {
+    outsideRef.current = value;
+    setOutside(value);
+  };
   const [focusTarget, setFocusTarget] = useState<string | null>(null);
   const undoRef = useRef<HTMLButtonElement>(null);
 
@@ -76,7 +84,12 @@ export function TasksPage() {
   const ungrouped = tasksIn("");
 
   const ungroupedSection = (
-    <UngroupedSection tasks={ungrouped} taskDragging={taskDragging} ui={ui} />
+    <UngroupedSection
+      tasks={ungrouped}
+      taskDragging={taskDragging}
+      hot={outside}
+      ui={ui}
+    />
   );
 
   const addGroup = (e: FormEvent) => {
@@ -87,7 +100,7 @@ export function TasksPage() {
   };
 
   return (
-    <div className="space-y-4">
+    <div ref={rootRef} className="space-y-4">
       <div className="space-y-3">
         <div className="flex flex-wrap items-end justify-between gap-2">
           <div>
@@ -128,6 +141,14 @@ export function TasksPage() {
         onDragStart={(event) => {
           if (event.operation.source?.type === "task") setPreview(baseLayout);
         }}
+        onDragMove={(event) => {
+          if (event.operation.source?.type !== "task") return;
+          const main = rootRef.current
+            ?.closest("main")
+            ?.getBoundingClientRect();
+          const x = event.operation.position.current.x;
+          setOutsideBoth(main ? x < main.left || x > main.right : false);
+        }}
         onDragOver={(event) => {
           if (event.operation.source?.type !== "task") return;
           setPreview((p) => (p ? move(p, event) : p));
@@ -136,7 +157,19 @@ export function TasksPage() {
           const type = event.operation.source?.type;
           if (type === "task") {
             if (!event.canceled && preview) {
-              const next = move(preview, event);
+              let next = move(preview, event);
+              if (outsideRef.current) {
+                // Released beside the list: send the task to Ungrouped.
+                const id = String(event.operation.source?.id);
+                const none = columnKey("");
+                next = Object.fromEntries(
+                  Object.entries(next).map(([key, ids]) => [
+                    key,
+                    ids.map(String).filter((x) => x !== id),
+                  ]),
+                );
+                next[none] = [...next[none], id];
+              }
               const byId: Record<string, string[]> = {};
               for (const [key, ids] of Object.entries(next)) {
                 byId[groupIdOf(key)] = ids.map(String);
@@ -144,6 +177,7 @@ export function TasksPage() {
               dispatch({ type: "applyLayout", layout: byId });
             }
             setPreview(null);
+            setOutsideBoth(false);
           } else if (type === "group" && !event.canceled) {
             dispatch({
               type: "reorderGroups",
@@ -155,7 +189,7 @@ export function TasksPage() {
           }
         }}
       >
-        {ungrouped.length > 0 ? ungroupedSection : null}
+        {ungrouped.length > 0 || taskDragging ? ungroupedSection : null}
 
         {groups.map((g, i) => (
           <SortableGroup
@@ -167,8 +201,6 @@ export function TasksPage() {
             ui={ui}
           />
         ))}
-        {/* Empty Ungrouped only appears below the groups while dragging, so nothing above shifts. */}
-        {ungrouped.length === 0 && taskDragging ? ungroupedSection : null}
       </DragDropProvider>
 
       <form onSubmit={addGroup} className="flex gap-2">
