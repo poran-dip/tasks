@@ -1,7 +1,7 @@
 import { useDroppable } from "@dnd-kit/react";
 import { useSortable } from "@dnd-kit/react/sortable";
 import type { FormEvent, Ref } from "react";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { newId } from "@/lib/ids";
 import { useStore } from "@/state/context";
 import type { Group, Task } from "@/types";
@@ -79,8 +79,10 @@ function GroupView({
   const wasRenaming = useRef(false);
 
   useEffect(() => {
-    if (renaming) nameRef.current?.focus();
-    else if (wasRenaming.current) editRef.current?.focus();
+    if (renaming) {
+      nameRef.current?.focus();
+      nameRef.current?.select();
+    } else if (wasRenaming.current) editRef.current?.focus();
     wasRenaming.current = renaming;
   }, [renaming]);
 
@@ -130,12 +132,21 @@ function GroupView({
     }
   };
 
-  const startRename = () => {
+  const startRename = useCallback(() => {
     if (!group) return;
     setName(group.name);
     setColor(group.color);
     setRenaming(true);
-  };
+  }, [group]);
+
+  // A group created from the Add group button opens straight into rename mode.
+  const { newGroupId, setNewGroupId } = ui;
+  useEffect(() => {
+    if (group && newGroupId === group.id) {
+      startRename();
+      setNewGroupId(null);
+    }
+  }, [group, newGroupId, setNewGroupId, startRename]);
 
   return (
     <section
