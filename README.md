@@ -15,6 +15,8 @@ pnpm test       # unit tests (vitest)
 pnpm lint       # apply biome linting and formatting
 ```
 
+Routes like `/habits` use the browser history API, so a static host must serve `index.html` for unknown paths. `pnpm dev` and `pnpm preview` do this already, and `vercel.json` does it on Vercel.
+
 ## JSON import
 
 Import accepts an export from this app or a plain array. Every field is optional:

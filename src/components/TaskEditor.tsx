@@ -1,3 +1,4 @@
+import { TrashIcon } from "@phosphor-icons/react";
 import type { FormEvent, KeyboardEvent } from "react";
 import { useEffect, useRef, useState } from "react";
 import { useStore } from "@/state/context";
@@ -117,9 +118,11 @@ export function TaskEditor({ task, isDraft, onClose }: Props) {
         <button
           type="button"
           onClick={remove}
-          className="ml-auto rounded-md px-3 py-1.5 text-sm text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950"
+          aria-label="Delete task"
+          title="Delete task"
+          className="ml-auto rounded-md p-2 text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950"
         >
-          Delete
+          <TrashIcon aria-hidden="true" size={18} />
         </button>
       </div>
     </form>
