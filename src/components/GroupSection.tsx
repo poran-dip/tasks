@@ -71,10 +71,24 @@ function GroupView({
   const [name, setName] = useState(group?.name ?? "");
   const [color, setColor] = useState(group?.color ?? UNGROUPED_COLOR);
   const nameRef = useRef<HTMLInputElement>(null);
+  const editRef = useRef<HTMLButtonElement>(null);
+  const addRef = useRef<HTMLButtonElement>(null);
+  const wasRenaming = useRef(false);
 
   useEffect(() => {
     if (renaming) nameRef.current?.focus();
+    else if (wasRenaming.current) editRef.current?.focus();
+    wasRenaming.current = renaming;
   }, [renaming]);
+
+  const { focusTarget, setFocusTarget } = ui;
+  const targetKey = `add:${group?.id ?? ""}`;
+  useEffect(() => {
+    if (focusTarget === targetKey) {
+      addRef.current?.focus();
+      setFocusTarget(null);
+    }
+  }, [focusTarget, setFocusTarget, targetKey]);
 
   const groupId = group?.id ?? "";
   const accent = group?.color ?? UNGROUPED_COLOR;
@@ -144,7 +158,7 @@ function GroupView({
             onChange={(e) => setName(e.target.value)}
             onKeyDown={(e) => e.key === "Escape" && setRenaming(false)}
             placeholder="Group name"
-            className="min-w-0 flex-1 rounded-md border border-stone-300 bg-white px-2.5 py-1.5 text-sm outline-none focus:border-blue-500 dark:border-neutral-700 dark:bg-neutral-950"
+            className="min-w-0 flex-1 rounded-md border border-stone-300 bg-white px-2.5 py-1.5 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 dark:border-neutral-700 dark:bg-neutral-950"
           />
           <button
             type="submit"
@@ -187,6 +201,8 @@ function GroupView({
             <>
               <button
                 type="button"
+                ref={editRef}
+                aria-label={`Edit group ${group.name}`}
                 onClick={startRename}
                 className="rounded px-2 py-0.5 text-xs text-stone-500 hover:bg-stone-200 dark:text-stone-400 dark:hover:bg-neutral-800"
               >
@@ -194,6 +210,7 @@ function GroupView({
               </button>
               <button
                 type="button"
+                aria-label={`Delete group ${group.name}`}
                 onClick={removeGroup}
                 className="rounded px-2 py-0.5 text-xs text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950"
               >
@@ -217,6 +234,8 @@ function GroupView({
 
       <button
         type="button"
+        ref={addRef}
+        aria-label={`Add task to ${group?.name ?? "Ungrouped"}`}
         onClick={addTask}
         className="mt-3 ml-auto flex w-36 items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-blue-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 active:bg-blue-800"
       >

@@ -1,4 +1,5 @@
 import { useSortable } from "@dnd-kit/react/sortable";
+import { useEffect, useRef } from "react";
 import { formatDay } from "@/lib/dates";
 import { reappearDate } from "@/lib/repeat";
 import { useStore } from "@/state/context";
@@ -21,9 +22,11 @@ export function TaskCard({ task, index, column, ui }: Props) {
       <TaskEditor
         task={task}
         isDraft={ui.draftId === task.id}
-        onClose={() => {
+        onClose={(kept) => {
           ui.setEditingId(null);
           ui.setDraftId(null);
+          // The editor unmounts, so hand focus back to where the user came from.
+          ui.setFocusTarget(kept ? `task:${task.id}` : `add:${task.group}`);
         }}
       />
     );
@@ -42,6 +45,16 @@ function SortableTask({ task, index, column, ui }: Props) {
   });
 
   const done = task.completedAt !== null;
+  const label = task.task || "untitled task";
+  const editRef = useRef<HTMLButtonElement>(null);
+
+  const { focusTarget, setFocusTarget } = ui;
+  useEffect(() => {
+    if (focusTarget === `task:${task.id}`) {
+      editRef.current?.focus();
+      setFocusTarget(null);
+    }
+  }, [focusTarget, setFocusTarget, task.id]);
 
   const toggle = () => {
     dispatch({
@@ -62,7 +75,7 @@ function SortableTask({ task, index, column, ui }: Props) {
       <button
         type="button"
         ref={handleRef}
-        aria-label="Drag to move task"
+        aria-label={`Drag to move ${label}`}
         title="Drag to move"
         className="-my-1 mt-0 cursor-grab touch-none select-none rounded px-1.5 py-1 text-stone-300 hover:text-stone-500 active:cursor-grabbing dark:text-neutral-600"
       >
@@ -73,7 +86,7 @@ function SortableTask({ task, index, column, ui }: Props) {
         checked={done}
         onChange={toggle}
         className="mt-1 h-4 w-4 shrink-0 cursor-pointer accent-blue-600"
-        aria-label="Mark done"
+        aria-label={`Mark ${label} done`}
       />
       <div className="min-w-0 flex-1">
         <div
@@ -100,6 +113,8 @@ function SortableTask({ task, index, column, ui }: Props) {
       </div>
       <button
         type="button"
+        ref={editRef}
+        aria-label={`Edit ${label}`}
         onClick={() => ui.setEditingId(task.id)}
         className="rounded px-2 py-0.5 text-xs text-stone-500 hover:bg-stone-100 hover:text-stone-800 dark:text-stone-400 dark:hover:bg-neutral-800"
       >
