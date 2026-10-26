@@ -1,0 +1,5 @@
+# Tasks
+
+> Local-first to-do app with groups, repeating tasks, history, and streaks. Data stays in your browser; no account needed.
+
+- [Source and README](https://github.com/poran-dip/tasks): features, commands, and JSON import format
