@@ -1,5 +1,5 @@
 import { useSortable } from "@dnd-kit/react/sortable";
-import { PencilSimpleIcon } from "@phosphor-icons/react";
+import { PencilSimpleIcon } from "@phosphor-icons/react/dist/csr/PencilSimple";
 import { useEffect, useRef } from "react";
 import { formatDay } from "@/lib/dates";
 import { reappearDate } from "@/lib/repeat";
