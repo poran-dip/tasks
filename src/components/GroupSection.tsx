@@ -16,6 +16,8 @@ interface Props {
   tasks: Task[];
   /** True while a task is being dragged, so empty groups can show a drop hint. */
   taskDragging: boolean;
+  /** Ungrouped only: the pointer is beside the list, so a drop would ungroup the task. */
+  hot?: boolean;
   ui: TaskUi;
 }
 
@@ -60,6 +62,7 @@ function GroupView({
   group,
   tasks,
   taskDragging,
+  hot = false,
   ui,
   shellRef,
   handleRef,
@@ -138,7 +141,7 @@ function GroupView({
     <section
       ref={shellRef}
       className={`rounded-xl border bg-stone-100/60 p-3 dark:bg-neutral-900/40 ${
-        isDropTarget && taskDragging
+        (isDropTarget && taskDragging) || hot
           ? "border-blue-400 ring-2 ring-blue-300 dark:ring-blue-800"
           : "border-stone-200 dark:border-neutral-800"
       } ${dragging ? "opacity-60 shadow-xl" : ""}`}
@@ -227,23 +230,29 @@ function GroupView({
         ))}
         {tasks.length === 0 ? (
           <div className="rounded-lg border border-dashed border-stone-300 px-3 py-3 text-center text-xs text-stone-500 dark:border-neutral-700 dark:text-stone-400">
-            {taskDragging ? "Drop here" : "No tasks"}
+            {taskDragging
+              ? group
+                ? "Drop here"
+                : "Drop here, or beside the list, to ungroup"
+              : "No tasks"}
           </div>
         ) : null}
       </div>
 
-      <button
-        type="button"
-        ref={addRef}
-        aria-label={`Add task to ${group?.name ?? "Ungrouped"}`}
-        onClick={addTask}
-        className="mt-3 ml-auto flex w-36 items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-blue-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 active:bg-blue-800"
-      >
-        <span aria-hidden="true" className="text-lg leading-none">
-          +
-        </span>
-        Add task
-      </button>
+      {!group && tasks.length === 0 ? null : (
+        <button
+          type="button"
+          ref={addRef}
+          aria-label={`Add task to ${group?.name ?? "Ungrouped"}`}
+          onClick={addTask}
+          className="mt-3 ml-auto flex w-36 items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-blue-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 active:bg-blue-800"
+        >
+          <span aria-hidden="true" className="text-lg leading-none">
+            +
+          </span>
+          Add task
+        </button>
+      )}
     </section>
   );
 }
