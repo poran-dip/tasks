@@ -1,7 +1,7 @@
 import type { FormEvent, KeyboardEvent } from "react";
 import { useEffect, useRef, useState } from "react";
-import { useStore } from "../state/context";
-import type { Task } from "../types";
+import { useStore } from "@/state/context";
+import type { Task } from "@/types";
 import { useConfirm } from "./confirm";
 
 const inputCls =

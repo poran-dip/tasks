@@ -1,8 +1,8 @@
 import { useSortable } from "@dnd-kit/react/sortable";
-import { formatDay } from "../lib/dates";
-import { reappearDate } from "../lib/repeat";
-import { useStore } from "../state/context";
-import type { Task } from "../types";
+import { formatDay } from "@/lib/dates";
+import { reappearDate } from "@/lib/repeat";
+import { useStore } from "@/state/context";
+import type { Task } from "@/types";
 import type { TaskUi } from "./dnd";
 import { TaskEditor } from "./TaskEditor";
 

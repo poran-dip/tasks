@@ -1,8 +1,8 @@
-import { newId } from "../lib/ids";
-import { PALETTE } from "../lib/palette";
-import { resetDueTasks } from "../lib/repeat";
-import { defaultData, mergeData } from "../lib/storage";
-import type { AppData, Group, Settings, Task } from "../types";
+import { newId } from "@/lib/ids";
+import { PALETTE } from "@/lib/palette";
+import { resetDueTasks } from "@/lib/repeat";
+import { defaultData, mergeData } from "@/lib/storage";
+import type { AppData, Group, Settings, Task } from "@/types";
 
 export type TaskFields = Pick<Task, "task" | "note" | "group" | "repeatDays">;
 
