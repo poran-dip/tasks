@@ -1,7 +1,7 @@
 import { move } from "@dnd-kit/helpers";
 import { DragDropProvider } from "@dnd-kit/react";
 import type { FormEvent } from "react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { TaskUi } from "@/components/dnd";
 import { columnKey, groupIdOf } from "@/components/dnd";
 import { SortableGroup, UngroupedSection } from "@/components/GroupSection";
@@ -15,10 +15,19 @@ export function TasksPage() {
   const [preview, setPreview] = useState<Record<string, string[]> | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [draftId, setDraftId] = useState<string | null>(null);
-  const [toast, setToast] = useState<{ id: string; label: string } | null>(
-    null,
-  );
+  const [toast, setToast] = useState<{
+    id: string;
+    label: string;
+    focusUndo: boolean;
+  } | null>(null);
   const [newGroup, setNewGroup] = useState("");
+  const [focusTarget, setFocusTarget] = useState<string | null>(null);
+  const undoRef = useRef<HTMLButtonElement>(null);
+
+  // With completed tasks hidden the card vanishes, so keep keyboard focus on something useful.
+  useEffect(() => {
+    if (toast?.focusUndo) undoRef.current?.focus();
+  }, [toast]);
 
   useEffect(() => {
     if (!toast) return;
@@ -31,7 +40,10 @@ export function TasksPage() {
     draftId,
     setEditingId,
     setDraftId,
-    onCompleted: (id, label) => setToast({ id, label }),
+    focusTarget,
+    setFocusTarget,
+    onCompleted: (id, label) =>
+      setToast({ id, label, focusUndo: settings.hideCompleted }),
   };
 
   const total = tasks.length;
@@ -97,7 +109,14 @@ export function TasksPage() {
             {settings.hideCompleted ? "Show completed" : "Hide completed"}
           </button>
         </div>
-        <div className="h-2 overflow-hidden rounded-full bg-stone-200 dark:bg-neutral-800">
+        <div
+          role="progressbar"
+          aria-label="Tasks completed"
+          aria-valuemin={0}
+          aria-valuemax={total}
+          aria-valuenow={done}
+          className="h-2 overflow-hidden rounded-full bg-stone-200 dark:bg-neutral-800"
+        >
           <div
             className="h-full bg-blue-600 transition-[width]"
             style={{ width: total ? `${(done / total) * 100}%` : "0%" }}
@@ -157,7 +176,7 @@ export function TasksPage() {
           value={newGroup}
           onChange={(e) => setNewGroup(e.target.value)}
           placeholder="New group (e.g. ML Syllabus, Job Hunting)"
-          className="min-w-0 flex-1 rounded-md border border-stone-300 bg-white px-3 py-2 text-sm outline-none focus:border-blue-500 dark:border-neutral-700 dark:bg-neutral-900"
+          className="min-w-0 flex-1 rounded-md border border-stone-300 bg-white px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 dark:border-neutral-700 dark:bg-neutral-900"
         />
         <button
           type="submit"
@@ -167,25 +186,32 @@ export function TasksPage() {
         </button>
       </form>
 
-      {toast ? (
-        <div className="fixed inset-x-0 bottom-4 z-20 mx-auto flex w-fit max-w-[90vw] items-center gap-3 rounded-lg bg-stone-900 px-4 py-2.5 text-sm text-white shadow-lg dark:bg-stone-100 dark:text-neutral-900">
-          <span className="truncate">Completed: {toast.label}</span>
-          <button
-            type="button"
-            onClick={() => {
-              dispatch({
-                type: "toggleTask",
-                id: toast.id,
-                now: new Date().toISOString(),
-              });
-              setToast(null);
-            }}
-            className="font-semibold underline"
-          >
-            Undo
-          </button>
-        </div>
-      ) : null}
+      {/* Always mounted so screen readers announce the toast when it appears. */}
+      <div
+        role="status"
+        className="pointer-events-none fixed inset-x-0 bottom-4 z-20 flex justify-center px-4"
+      >
+        {toast ? (
+          <div className="pointer-events-auto flex w-fit max-w-full items-center gap-3 rounded-lg bg-stone-900 px-4 py-2.5 text-sm text-white shadow-lg dark:bg-stone-100 dark:text-neutral-900">
+            <span className="truncate">Completed: {toast.label}</span>
+            <button
+              type="button"
+              ref={undoRef}
+              onClick={() => {
+                dispatch({
+                  type: "toggleTask",
+                  id: toast.id,
+                  now: new Date().toISOString(),
+                });
+                setToast(null);
+              }}
+              className="font-semibold underline"
+            >
+              Undo
+            </button>
+          </div>
+        ) : null}
+      </div>
     </div>
   );
 }

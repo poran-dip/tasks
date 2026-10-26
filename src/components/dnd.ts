@@ -5,6 +5,9 @@ export interface TaskUi {
   draftId: string | null;
   setEditingId: (id: string | null) => void;
   setDraftId: (id: string | null) => void;
+  /** Element to focus once it renders: "task:<id>" (Edit button) or "add:<groupId>" (Add task button). */
+  focusTarget: string | null;
+  setFocusTarget: (target: string | null) => void;
   onCompleted: (taskId: string, label: string) => void;
 }
 

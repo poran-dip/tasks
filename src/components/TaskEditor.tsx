@@ -10,7 +10,8 @@ const inputCls =
 interface Props {
   task: Task;
   isDraft: boolean;
-  onClose: () => void;
+  /** `kept` is false when the task no longer exists (deleted or a cancelled draft). */
+  onClose: (kept: boolean) => void;
 }
 
 export function TaskEditor({ task, isDraft, onClose }: Props) {
@@ -39,12 +40,12 @@ export function TaskEditor({ task, isDraft, onClose }: Props) {
         repeatDays: repeat.trim() !== "" && n >= 1 ? Math.floor(n) : null,
       },
     });
-    onClose();
+    onClose(true);
   };
 
   const cancel = () => {
     if (isDraft) dispatch({ type: "deleteTask", id: task.id });
-    onClose();
+    onClose(!isDraft);
   };
 
   const remove = async () => {
@@ -58,7 +59,7 @@ export function TaskEditor({ task, isDraft, onClose }: Props) {
     )
       return;
     dispatch({ type: "deleteTask", id: task.id });
-    onClose();
+    onClose(false);
   };
 
   const onKeyDown = (e: KeyboardEvent) => {
