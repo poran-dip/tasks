@@ -14,7 +14,6 @@ export type Action =
   | { type: "toggleTask"; id: string; now: string }
   /** Bring a completed task back but keep its history entry. */
   | { type: "reopenTask"; id: string }
-  | { type: "moveTask"; id: string; group: string; beforeId: string | null }
   | { type: "addGroup"; id?: string; name: string; color?: string }
   | {
       type: "updateGroup";
@@ -22,7 +21,6 @@ export type Action =
       patch: Partial<Pick<Group, "name" | "color">>;
     }
   | { type: "deleteGroup"; id: string }
-  | { type: "moveGroup"; id: string; beforeId: string | null }
   /** Set the order of groups; ids not listed keep their relative order at the end. */
   | { type: "reorderGroups"; ids: string[] }
   /** Apply a drag-and-drop result: visible task ids per group id ("" = Ungrouped). */
@@ -108,28 +106,6 @@ export function reducer(state: AppData, action: Action): AppData {
         ),
       };
 
-    case "moveTask": {
-      const task = state.tasks.find((t) => t.id === action.id);
-      if (!task) return state;
-      const rest = state.tasks.filter((t) => t.id !== action.id);
-      const moved: Task = { ...task, group: action.group };
-
-      let index = rest.length;
-      if (action.beforeId && action.beforeId !== action.id) {
-        const at = rest.findIndex((t) => t.id === action.beforeId);
-        if (at >= 0) index = at;
-      } else {
-        // append after the last task of the target group
-        let last = -1;
-        rest.forEach((t, i) => {
-          if (t.group === action.group) last = i;
-        });
-        if (last >= 0) index = last + 1;
-      }
-      rest.splice(index, 0, moved);
-      return { ...state, tasks: rest };
-    }
-
     case "addGroup": {
       const group: Group = {
         id: action.id ?? newId(),
@@ -160,19 +136,6 @@ export function reducer(state: AppData, action: Action): AppData {
           t.group === action.id ? { ...t, group: "" } : t,
         ),
       };
-
-    case "moveGroup": {
-      const group = state.groups.find((g) => g.id === action.id);
-      if (!group) return state;
-      const rest = state.groups.filter((g) => g.id !== action.id);
-      let index = rest.length;
-      if (action.beforeId) {
-        const at = rest.findIndex((g) => g.id === action.beforeId);
-        if (at >= 0) index = at;
-      }
-      rest.splice(index, 0, group);
-      return { ...state, groups: rest };
-    }
 
     case "reorderGroups": {
       const byId = new Map(state.groups.map((g) => [g.id, g]));

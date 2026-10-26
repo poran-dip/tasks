@@ -2,7 +2,7 @@ import type { AppData, Group, HistoryEntry, Task } from "@/types";
 import { newId } from "./ids";
 import { PALETTE } from "./palette";
 
-export const STORAGE_KEY = "todo-app:v1";
+export const STORAGE_KEY = "tasks:v1";
 
 export function defaultData(): AppData {
   return {
@@ -46,8 +46,7 @@ function repeatValue(v: unknown): number | null {
 
 /**
  * Accepts either a full export ({ groups, tasks, history, settings }) or a plain
- * array of tasks. A task's `group` (or the legacy `urgency`) may be a group id or
- * a group name; unknown names create new groups. Every task field may be empty.
+ * array of tasks. A task's `group` may be a group id or a group name; unknown names create new groups. Every task field may be empty.
  */
 export function normalizeData(raw: unknown): AppData | null {
   let rawGroups: unknown[] = [];
@@ -108,7 +107,7 @@ export function normalizeData(raw: unknown): AppData | null {
       id,
       task: str(t.task),
       note: str(t.note),
-      group: resolveGroup(t.group ?? t.urgency),
+      group: resolveGroup(t.group),
       repeatDays: repeatValue(t.repeatDays),
       completedAt: validIso(t.completedAt),
     });

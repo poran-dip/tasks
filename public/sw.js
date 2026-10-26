@@ -1,7 +1,6 @@
-// Network-first service worker: always uses fresh files when the local server is
-// running, and falls back to the cached copy when it is not. That lets the
-// installed app open from its icon even with the server stopped.
-const CACHE = "todo-app-shell-v1";
+// Network-first service worker: uses fresh files when online and falls back to the
+// cached copy when offline, so the installed app still opens without a connection.
+const CACHE = "tasks-shell-v1";
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
