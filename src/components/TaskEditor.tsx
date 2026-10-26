@@ -1,4 +1,4 @@
-import { TrashIcon } from "@phosphor-icons/react";
+import { TrashIcon } from "@phosphor-icons/react/dist/csr/Trash";
 import type { FormEvent, KeyboardEvent } from "react";
 import { useEffect, useRef, useState } from "react";
 import { useStore } from "@/state/context";
