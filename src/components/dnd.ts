@@ -8,6 +8,9 @@ export interface TaskUi {
   /** Element to focus once it renders: "task:<id>" (Edit button) or "add:<groupId>" (Add task button). */
   focusTarget: string | null;
   setFocusTarget: (target: string | null) => void;
+  /** Id of a group that was just created and should open in rename mode. */
+  newGroupId: string | null;
+  setNewGroupId: (id: string | null) => void;
   onCompleted: (taskId: string, label: string) => void;
 }
 

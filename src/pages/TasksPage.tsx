@@ -1,10 +1,10 @@
 import { move } from "@dnd-kit/helpers";
 import { DragDropProvider } from "@dnd-kit/react";
-import type { FormEvent } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { TaskUi } from "@/components/dnd";
 import { columnKey, groupIdOf } from "@/components/dnd";
 import { SortableGroup, UngroupedSection } from "@/components/GroupSection";
+import { newId } from "@/lib/ids";
 import { useStore } from "@/state/context";
 
 export function TasksPage() {
@@ -20,7 +20,7 @@ export function TasksPage() {
     label: string;
     focusUndo: boolean;
   } | null>(null);
-  const [newGroup, setNewGroup] = useState("");
+  const [newGroupId, setNewGroupId] = useState<string | null>(null);
   const rootRef = useRef<HTMLDivElement>(null);
   /** True while the pointer is in the empty space left or right of the list. */
   const [outside, setOutside] = useState(false);
@@ -48,6 +48,8 @@ export function TasksPage() {
     draftId,
     setEditingId,
     setDraftId,
+    newGroupId,
+    setNewGroupId,
     focusTarget,
     setFocusTarget,
     onCompleted: (id, label) =>
@@ -92,11 +94,10 @@ export function TasksPage() {
     />
   );
 
-  const addGroup = (e: FormEvent) => {
-    e.preventDefault();
-    if (!newGroup.trim()) return;
-    dispatch({ type: "addGroup", name: newGroup });
-    setNewGroup("");
+  const addGroup = () => {
+    const id = newId();
+    dispatch({ type: "addGroup", id, name: "Untitled group" });
+    setNewGroupId(id);
   };
 
   return (
@@ -109,18 +110,27 @@ export function TasksPage() {
               {total === 0 ? "Nothing here yet" : `${done} of ${total} done`}
             </p>
           </div>
-          <button
-            type="button"
-            onClick={() =>
-              dispatch({
-                type: "setSettings",
-                patch: { hideCompleted: !settings.hideCompleted },
-              })
-            }
-            className="rounded-md border border-stone-300 px-3 py-1.5 text-sm hover:bg-stone-100 dark:border-neutral-700 dark:hover:bg-neutral-800"
-          >
-            {settings.hideCompleted ? "Show completed" : "Hide completed"}
-          </button>
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={addGroup}
+              className="rounded-md border border-stone-300 px-3 py-1.5 text-sm hover:bg-stone-100 dark:border-neutral-700 dark:hover:bg-neutral-800"
+            >
+              Add group
+            </button>
+            <button
+              type="button"
+              onClick={() =>
+                dispatch({
+                  type: "setSettings",
+                  patch: { hideCompleted: !settings.hideCompleted },
+                })
+              }
+              className="rounded-md border border-stone-300 px-3 py-1.5 text-sm hover:bg-stone-100 dark:border-neutral-700 dark:hover:bg-neutral-800"
+            >
+              {settings.hideCompleted ? "Show completed" : "Hide completed"}
+            </button>
+          </div>
         </div>
         <div
           role="progressbar"
@@ -202,21 +212,6 @@ export function TasksPage() {
           />
         ))}
       </DragDropProvider>
-
-      <form onSubmit={addGroup} className="flex gap-2">
-        <input
-          value={newGroup}
-          onChange={(e) => setNewGroup(e.target.value)}
-          placeholder="New group (e.g. ML Syllabus, Job Hunting)"
-          className="min-w-0 flex-1 rounded-md border border-stone-300 bg-white px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 dark:border-neutral-700 dark:bg-neutral-900"
-        />
-        <button
-          type="submit"
-          className="rounded-md bg-stone-900 px-4 py-2 text-sm font-medium text-white hover:bg-stone-700 dark:bg-stone-100 dark:text-neutral-900 dark:hover:bg-stone-300"
-        >
-          Add group
-        </button>
-      </form>
 
       {/* Always mounted so screen readers announce the toast when it appears. */}
       <div
