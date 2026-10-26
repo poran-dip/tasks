@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { normalizeData } from "../lib/storage";
-import type { AppData } from "../types";
+import { normalizeData } from "@/lib/storage";
+import type { AppData } from "@/types";
 import { reducer } from "./reducer";
 
 const empty = (): AppData => ({

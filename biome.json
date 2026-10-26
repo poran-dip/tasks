@@ -6,7 +6,7 @@
     "useIgnoreFile": true
   },
   "files": {
-    "includes": ["**", "!!**/dist", "!!public/favicon.svg"]
+    "includes": ["**", "!!**/dist", "!!public/favicon.svg", "!pnpm-lock.yaml"]
   },
   "formatter": {
     "enabled": true,

@@ -2,10 +2,10 @@ import { move } from "@dnd-kit/helpers";
 import { DragDropProvider } from "@dnd-kit/react";
 import type { FormEvent } from "react";
 import { useEffect, useMemo, useState } from "react";
-import type { TaskUi } from "../components/dnd";
-import { columnKey, groupIdOf } from "../components/dnd";
-import { SortableGroup, UngroupedSection } from "../components/GroupSection";
-import { useStore } from "../state/context";
+import type { TaskUi } from "@/components/dnd";
+import { columnKey, groupIdOf } from "@/components/dnd";
+import { SortableGroup, UngroupedSection } from "@/components/GroupSection";
+import { useStore } from "@/state/context";
 
 export function TasksPage() {
   const { state, dispatch } = useStore();
