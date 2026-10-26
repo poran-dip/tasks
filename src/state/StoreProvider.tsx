@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { useEffect, useMemo, useReducer } from "react";
+import { useEffect, useMemo, useReducer, useRef } from "react";
 import { resetDueTasks } from "@/lib/repeat";
 import {
   loadData,
@@ -21,6 +21,20 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     saveData(state);
   }, [state]);
+
+  // Ask the browser to keep our data when storage runs low. Wait until there is
+  // something worth keeping, because Firefox shows a permission prompt for this.
+  const askedPersist = useRef(false);
+  const hasData = state.tasks.length > 0 || state.history.length > 0;
+  useEffect(() => {
+    if (!hasData || askedPersist.current) return;
+    askedPersist.current = true;
+    const storage = navigator.storage;
+    storage
+      ?.persisted?.()
+      .then((persisted) => (persisted ? true : storage.persist()))
+      .catch(() => {});
+  }, [hasData]);
 
   useEffect(() => {
     const tick = () =>
