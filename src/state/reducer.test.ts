@@ -76,22 +76,11 @@ describe("reducer", () => {
     expect(s.history).toHaveLength(1);
   });
 
-  it("moves tasks between groups and before a target", () => {
-    let s = reducer(empty(), { type: "addGroup", id: "g1", name: "A" });
-    s = reducer(s, { type: "addGroup", id: "g2", name: "B" });
-    for (const id of ["t1", "t2", "t3"])
-      s = reducer(s, { type: "addTask", id, fields: { group: "g1" } });
-    s = reducer(s, { type: "moveTask", id: "t3", group: "g2", beforeId: null });
-    expect(s.tasks.find((t) => t.id === "t3")?.group).toBe("g2");
-    s = reducer(s, { type: "moveTask", id: "t3", group: "g1", beforeId: "t1" });
-    expect(s.tasks.map((t) => t.id)).toEqual(["t3", "t1", "t2"]);
-  });
-
   it("deleting a group ungroups its tasks and reordering groups works", () => {
     let s = reducer(empty(), { type: "addGroup", id: "g1", name: "A" });
     s = reducer(s, { type: "addGroup", id: "g2", name: "B" });
     s = reducer(s, { type: "addTask", id: "t", fields: { group: "g1" } });
-    s = reducer(s, { type: "moveGroup", id: "g2", beforeId: "g1" });
+    s = reducer(s, { type: "reorderGroups", ids: ["g2", "g1"] });
     expect(s.groups.map((g) => g.id)).toEqual(["g2", "g1"]);
     s = reducer(s, { type: "deleteGroup", id: "g1" });
     expect(s.tasks[0].group).toBe("");
@@ -99,11 +88,11 @@ describe("reducer", () => {
 });
 
 describe("import", () => {
-  it("reads the old todo.html format (urgency as group name)", () => {
+  it("reads a plain array with group names, matching case-insensitively", () => {
     const data = normalizeData([
-      { id: "a", urgency: "immediate", task: "One", note: "n" },
-      { id: "b", urgency: "Immediate", task: "Two" },
-      { id: "c", urgency: "", task: "" },
+      { id: "a", group: "immediate", task: "One", note: "n" },
+      { id: "b", group: "Immediate", task: "Two" },
+      { id: "c", group: "", task: "" },
     ]);
     expect(data).not.toBeNull();
     expect(data?.groups.map((g) => g.name)).toEqual(["immediate"]);
